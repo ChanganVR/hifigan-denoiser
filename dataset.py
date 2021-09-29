@@ -132,6 +132,13 @@ class MelDataset(torch.utils.data.Dataset):
             input_audio = self.cached_input_wav
             output_audio = self.cached_output_wav
             self._cache_ref_count -= 1
+        
+        input_audio = np.trim_zeros(input_audio, trim='b')
+        output_audio = np.trim_zeros(output_audio, trim='b')
+        if input_audio.shape[0] > output_audio.shape[0]:
+            output_audio = np.pad(output_audio, (0, input_audio.shape[0] - output_audio.shape[0]))
+        if input_audio.shape[0] < output_audio.shape[0]:
+            input_audio = np.pad(input_audio, (0, output_audio.shape[0] - input_audio.shape[0]))
 
         input_audio = torch.FloatTensor(input_audio)
         input_audio = input_audio.unsqueeze(0)
@@ -139,7 +146,7 @@ class MelDataset(torch.utils.data.Dataset):
         output_audio = torch.FloatTensor(output_audio)
         output_audio = output_audio.unsqueeze(0)
 
-        assert input_audio.size(1) == output_audio.size(1), "Inconsistent dataset length, unable to sampling"
+        assert input_audio.size(1) == output_audio.size(1), f"Inconsistent dataset length, unable to sampling. input: {input_audio.size(1)}, output: {output_audio.size(1)}" 
 
         #if not self.fine_tuning:
         if self.split:

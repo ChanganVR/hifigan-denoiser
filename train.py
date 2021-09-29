@@ -1,6 +1,4 @@
 import warnings
-
-warnings.simplefilter(action='ignore', category=FutureWarning)
 import itertools
 import os
 import time
@@ -19,6 +17,8 @@ from discriminator import SpecDiscriminator, MultiScaleDiscriminator, feature_lo
 from utils import plot_spectrogram, scan_checkpoint, load_checkpoint, save_checkpoint, HParam
 
 torch.backends.cudnn.benchmark = True
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def train(rank, args, hp, hp_str):
@@ -271,8 +271,8 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--group_name', default=None)
-    parser.add_argument('--train_file', default='LJSpeech-1.1/training.txt')
-    parser.add_argument('--valid_file', default='LJSpeech-1.1/validation.txt')
+    parser.add_argument('--train_file', default='data/hifigan/training.txt')
+    parser.add_argument('--valid_file', default='data/hifigan/validation.txt')
     parser.add_argument('--checkpoint_path', default='cp_hifigan')
     parser.add_argument('-c', '--config', default='config.yaml')
     parser.add_argument('--training_epochs', default=3100, type=int)
@@ -281,6 +281,15 @@ def main():
 
     args = parser.parse_args()
 
+    import submitit
+    executor = submitit.AutoExecutor(folder="data/logs/submitit/%j")
+    executor.update_parameters(job_name='hifigan', timeout_min=60*72, partition='devlab',
+                                gpus_per_node=1, cpus_per_task=10, constraint='volta32gb')
+    job = executor.submit(run, args)
+    print(job.job_id)
+
+
+def run(args):
     hp = HParam(args.config)
     with open(args.config, 'r') as f:
         hp_str = ''.join(f.readlines())

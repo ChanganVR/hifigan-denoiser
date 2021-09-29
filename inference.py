@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import warnings
 import glob
 import os
 import argparse
@@ -10,8 +11,12 @@ from scipy.io.wavfile import write
 from dataset import mel_spectrogram, MAX_WAV_VALUE, load_wav
 from generator import Generator
 from utils import HParam
+from tqdm import tqdm
 h = None
 device = None
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 def load_checkpoint(filepath, device):
@@ -51,7 +56,7 @@ def inference(a, with_postnet=False):
     generator.eval()
     #generator.remove_weight_norm()
     with torch.no_grad():
-        for i, filename in enumerate(filelist):
+        for i, filename in enumerate(tqdm(filelist)):
             wav, sr = load_wav(os.path.join(a.input_wavs_dir, filename))
             wav = wav / MAX_WAV_VALUE
             wav = normalize(wav) * 0.95
@@ -66,7 +71,7 @@ def inference(a, with_postnet=False):
                 os.path.splitext(filename)[0] + '_generated.wav'
             )
             write(output_file, hp.audio.sampling_rate, audio)
-            print(output_file)
+            # print(output_file)
 
 
 def main():

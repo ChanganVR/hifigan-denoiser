@@ -1,7 +1,7 @@
 data: # root path of train/validation data (either relative/absoulte path is ok)
-  input_wavs: 'data\wavs'
-  output_wavs: 'data\clean'
-  mel_path: 'data\mels'
+  input_wavs: 'data/hifigan2/wavs'
+  output_wavs: 'data/hifigan2/clean'
+  mel_path: 'data/mels'
 ---
 train:
   seed: 1234
@@ -10,7 +10,7 @@ train:
   discriminator_train_start_steps: 1000000
   postnet_start_steps: 500000
   num_workers: 4
-  batch_size: 2
+  batch_size: 16
   optimizer: 'adam'
   adamG:
     lr: 0.001
@@ -37,7 +37,7 @@ audio:
   filter_length: 1024
   hop_length: 256 # WARNING: this can't be changed.
   win_length: 1024
-  sampling_rate: 22050
+  sampling_rate: 16000
   mel_fmin: 0.0
   mel_fmax: 8000.0
   fmax_for_loss: null
@@ -73,5 +73,5 @@ logs:
   summary_interval: 100
   validation_interval: 1000
   save_interval: 5000
-  chkpt_dir: 'chkpt'
-  log_dir: 'logs'
+  chkpt_dir: 'data/hifigan2/v3/chkpt'
+  log_dir: 'data/hifigan2/v3/logs'
